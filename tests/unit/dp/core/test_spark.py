@@ -3,7 +3,7 @@ from unittest import mock
 from pyspark import SparkContext, SparkConf
 from pyspark.sql import SparkSession, DataFrame
 
-from dp.spark import Spark, Job, Source, Sink
+from dp.core.spark import Spark, Job, Source, Sink
 
 
 def test_submit():

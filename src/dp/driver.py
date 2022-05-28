@@ -2,7 +2,7 @@ import logging
 import sys
 import traceback
 
-from dp import factory
+from dp.infra import factory
 
 
 def main(argv):

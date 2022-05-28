@@ -1,4 +1,4 @@
-from dp.spark import Spark, Job
+from dp.core.spark import Spark, Job
 
 
 def create_spark(argv) -> Spark:

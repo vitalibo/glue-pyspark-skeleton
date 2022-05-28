@@ -2,13 +2,13 @@ from unittest import mock
 
 import pytest
 
-import driver
-from dp.spark import Spark, Job
+from dp import driver
+from dp.core.spark import Spark, Job
 
 
 def test_main():
-    with mock.patch('dp.factory.create_spark') as mock_create_spark, \
-            mock.patch('dp.factory.create_job') as mock_create_job:
+    with mock.patch('dp.infra.factory.create_spark') as mock_create_spark, \
+            mock.patch('dp.infra.factory.create_job') as mock_create_job:
         mock_spark = mock.MagicMock(spec=Spark)
         mock_create_spark.return_value = mock_spark
         mock_spark.__enter__.return_value = mock_spark
@@ -26,8 +26,8 @@ def test_main():
 
 
 def test_main_create_job_failure():
-    with mock.patch('dp.factory.create_spark') as mock_create_spark, \
-            mock.patch('dp.factory.create_job') as mock_create_job:
+    with mock.patch('dp.infra.factory.create_spark') as mock_create_spark, \
+            mock.patch('dp.infra.factory.create_job') as mock_create_job:
         mock_spark = mock.MagicMock(spec=Spark)
         mock_create_spark.return_value = mock_spark
         mock_spark.__enter__.return_value = mock_spark
@@ -45,8 +45,8 @@ def test_main_create_job_failure():
 
 
 def test_main_create_spark_failure():
-    with mock.patch('dp.factory.create_spark') as mock_create_spark, \
-            mock.patch('dp.factory.create_job') as mock_create_job:
+    with mock.patch('dp.infra.factory.create_spark') as mock_create_spark, \
+            mock.patch('dp.infra.factory.create_job') as mock_create_job:
         mock_spark = mock.MagicMock(spec=Spark)
         mock_create_spark.side_effect = Exception()
         mock_spark.__enter__.return_value = mock_spark
@@ -65,8 +65,8 @@ def test_main_create_spark_failure():
 
 
 def test_main_submit_failure():
-    with mock.patch('dp.factory.create_spark') as mock_create_spark, \
-            mock.patch('dp.factory.create_job') as mock_create_job:
+    with mock.patch('dp.infra.factory.create_spark') as mock_create_spark, \
+            mock.patch('dp.infra.factory.create_job') as mock_create_job:
         mock_spark = mock.MagicMock(spec=Spark)
         mock_create_spark.return_value = mock_spark
         mock_spark.__enter__.return_value = mock_spark
