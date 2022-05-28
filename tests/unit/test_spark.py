@@ -21,10 +21,10 @@ def test_extract():
     mock_dataframe = mock.Mock(spec=DataFrame)
     mock_source.extract.return_value = mock_dataframe
 
-    actual = spark.extract(mock_source, 123, foo="bar")
+    actual = spark.extract(mock_source, 123, foo='bar')
 
     assert actual == mock_dataframe
-    mock_source.extract.assert_called_with(spark, 123, foo="bar")
+    mock_source.extract.assert_called_with(spark, 123, foo='bar')
 
 
 def test_load():
@@ -32,9 +32,9 @@ def test_load():
     mock_sink = mock.Mock(spec=Sink)
     mock_dataframe = mock.Mock(spec=DataFrame)
 
-    spark.load(mock_sink, mock_dataframe, 123, foo="bar")
+    spark.load(mock_sink, mock_dataframe, 123, foo='bar')
 
-    mock_sink.load.assert_called_with(spark, mock_dataframe, 123, foo="bar")
+    mock_sink.load.assert_called_with(spark, mock_dataframe, 123, foo='bar')
 
 
 def test_create_data_frame():
@@ -43,10 +43,10 @@ def test_create_data_frame():
     mock_dataframe = mock.Mock(spec=DataFrame)
     mock_spark_session.createDataFrame.return_value = mock_dataframe
 
-    actual = spark.create_data_frame(123, foo="bar")
+    actual = spark.create_data_frame(123, foo='bar')
 
     assert actual == mock_dataframe
-    mock_spark_session.createDataFrame.assert_called_with(123, foo="bar")
+    mock_spark_session.createDataFrame.assert_called_with(123, foo='bar')
 
 
 def test_spark_session():
