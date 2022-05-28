@@ -1,9 +1,15 @@
 from dp.core.spark import Spark, Job
 
 
-def create_spark(argv) -> Spark:
-    """ Create PySpark runner """
+class Factory:
+    """ Factory class for all objects """
 
+    def __init__(self, argv):
+        self.__argv = argv
+        self.__config = {}
 
-def create_job(argv) -> Job:
-    """ Create instance of Job """
+    def create_spark(self) -> Spark:
+        """ Create PySpark runner """
+
+    def create_job(self) -> Job:
+        """ Create instance of Job """

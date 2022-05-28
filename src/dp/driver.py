@@ -1,21 +1,22 @@
 import logging
 import sys
-import traceback
 
-from dp.infra import factory
+from dp.infra.factory import Factory
 
 
 def main(argv):
     """ Glue Job main entry point """
 
-    try:
-        job = factory.create_job(argv)
+    factory = Factory(argv)
 
-        with factory.create_spark(argv) as spark:
+    try:
+        job = factory.create_job()
+
+        with factory.create_spark() as spark:
             spark.submit(job)
 
     except Exception as e:
-        logging.fatal('Unexpected error', traceback.format_exc())
+        logging.fatal('Unexpected error')
         raise e
 
 
