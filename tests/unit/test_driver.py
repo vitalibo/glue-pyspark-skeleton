@@ -3,15 +3,16 @@ from unittest import mock
 import pytest
 
 import driver
+from dp.spark import Spark, Job
 
 
 def test_main():
     with mock.patch('dp.factory.create_spark') as mock_create_spark, \
             mock.patch('dp.factory.create_job') as mock_create_job:
-        mock_spark = mock.MagicMock()
+        mock_spark = mock.MagicMock(spec=Spark)
         mock_create_spark.return_value = mock_spark
         mock_spark.__enter__.return_value = mock_spark
-        mock_job = mock.Mock()
+        mock_job = mock.Mock(spec=Job)
         mock_create_job.return_value = mock_job
         argv = ['--foo=bar']
 
@@ -27,7 +28,7 @@ def test_main():
 def test_main_create_job_failure():
     with mock.patch('dp.factory.create_spark') as mock_create_spark, \
             mock.patch('dp.factory.create_job') as mock_create_job:
-        mock_spark = mock.MagicMock()
+        mock_spark = mock.MagicMock(spec=Spark)
         mock_create_spark.return_value = mock_spark
         mock_spark.__enter__.return_value = mock_spark
         mock_create_job.side_effect = Exception()
@@ -46,10 +47,10 @@ def test_main_create_job_failure():
 def test_main_create_spark_failure():
     with mock.patch('dp.factory.create_spark') as mock_create_spark, \
             mock.patch('dp.factory.create_job') as mock_create_job:
-        mock_spark = mock.MagicMock()
+        mock_spark = mock.MagicMock(spec=Spark)
         mock_create_spark.side_effect = Exception()
         mock_spark.__enter__.return_value = mock_spark
-        mock_job = mock.Mock()
+        mock_job = mock.Mock(spec=Job)
         mock_create_job.return_value = mock_job
         argv = ['--foo=bar']
 
@@ -66,11 +67,11 @@ def test_main_create_spark_failure():
 def test_main_submit_failure():
     with mock.patch('dp.factory.create_spark') as mock_create_spark, \
             mock.patch('dp.factory.create_job') as mock_create_job:
-        mock_spark = mock.MagicMock()
+        mock_spark = mock.MagicMock(spec=Spark)
         mock_create_spark.return_value = mock_spark
         mock_spark.__enter__.return_value = mock_spark
         mock_spark.submit.side_effect = Exception()
-        mock_job = mock.Mock()
+        mock_job = mock.Mock(spec=Job)
         mock_create_job.return_value = mock_job
         argv = ['--foo=bar']
 
