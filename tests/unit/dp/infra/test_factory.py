@@ -11,15 +11,14 @@ from dp.infra.factory import Factory
 def test_create_spark():
     mock_factory = mock.Mock()
     mock_factory._conf = {'properties': {'foo': '123'}}
-    mock_module = mock.Mock()
     mock_glue_spark = mock.Mock()
-    mock_module.GlueSpark.return_value = mock_glue_spark
-    with mock.patch.dict('sys.modules', {'dp.infra.aws.glue': mock_module}):
+    with mock.patch('dp.infra.aws.glue.GlueSpark') as mock_glue_spark_class:
+        mock_glue_spark_class.return_value = mock_glue_spark
         actual = Factory.create_spark(mock_factory)
 
         assert actual == mock_glue_spark
-        mock_module.GlueSpark.assert_called_once()
-        sc = mock_module.GlueSpark.call_args[0][0]
+        mock_glue_spark_class.assert_called_once()
+        sc = mock_glue_spark_class.call_args[0][0]
         assert not sc._jsc.sc().isStopped()
         conf = sc.getConf()
         assert conf.get('spark.sql.session.timeZone') == 'UTC'

@@ -1,18 +1,20 @@
 import sys
 
-from awsglue import job  # pylint: disable=import-error
-from awsglue.context import GlueContext  # pylint: disable=import-error
-from awsglue.utils import getResolvedOptions  # pylint: disable=import-error
+import awsglue
+from awsglue import job, context
+from awsglue.context import GlueContext
+from awsglue.utils import getResolvedOptions
 from pyspark import SparkContext
+from pyspark.sql import DataFrame
 
-from dp.core.spark import Spark
+from dp.core.spark import Spark, Source, Sink
 
 
 class GlueSpark(Spark):
     """ Extend Spark with AWS Glue ETL functionality """
 
     def __init__(self, sc: SparkContext):
-        self.__gc = GlueContext(sc)
+        self.__gc = context.GlueContext(sc)
         self.__job = job.Job(self.__gc)
         super().__init__(self.__gc.spark_session)
 
@@ -39,3 +41,42 @@ class GlueSpark(Spark):
             self.__job.commit()
 
         super().__exit__(exc_type, exc_val, exc_tb)
+
+
+class GlueSource(Source):
+    """ Allows to create Source from AWS Glue connection options """
+
+    def __init__(self, **kwargs):
+        self.__kwargs = kwargs
+
+    def extract(self, spark: GlueSpark, *args, **kwargs) -> DataFrame:
+        dyf = spark.glue_context \
+            .create_dynamic_frame_from_options(
+                connection_type=self.__kwargs['connection_type'],
+                connection_options=self.__kwargs.get('connection_options', {}),
+                format=self.__kwargs['format'],
+                format_options=self.__kwargs.get('format_options', {}),
+                push_down_predicate=kwargs.get('push_down_predicate', ''),
+                transformation_ctx=kwargs.get('transformation_ctx') or self.__kwargs.get('transformation_ctx', ''))
+
+        return dyf.toDF()
+
+
+class GlueSink(Sink):
+    """ Allows to create Sink from AWS Glue connection options """
+
+    def __init__(self, **kwargs):
+        self.__kwargs = kwargs
+
+    def load(self, spark: GlueSpark, df: DataFrame, *args, **kwargs) -> None:
+        transformation_ctx = kwargs.get('transformation_ctx') or self.__kwargs.get('transformation_ctx', '')
+
+        spark.glue_context \
+            .write_dynamic_frame \
+            .from_options(
+                frame=awsglue.DynamicFrame.fromDF(df, spark.glue_context, transformation_ctx),
+                connection_type=self.__kwargs['connection_type'],
+                connection_options=self.__kwargs.get('connection_options', {}),
+                format=self.__kwargs['format'],
+                format_options=self.__kwargs.get('format_options', {}),
+                transformation_ctx=transformation_ctx)

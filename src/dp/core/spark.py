@@ -25,6 +25,7 @@ class Source(abc.ABC):
 class Sink(abc.ABC):
     """ Abstraction for external data source available for read """
 
+    @abc.abstractmethod
     def load(self, spark: Spark, df: DataFrame, *args, **kwargs) -> None:
         """ Stores a :class:`pyspark.sql.DataFrame` into external data storage """
 

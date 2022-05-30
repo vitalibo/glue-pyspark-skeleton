@@ -1,3 +1,4 @@
+git+https://github.com/awslabs/aws-glue-libs.git@master
 pyspark==3.1.1
 pytest==7.1.2
 pylint==2.13.9
