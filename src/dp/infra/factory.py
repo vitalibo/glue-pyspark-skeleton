@@ -39,10 +39,18 @@ class Factory:
         job = getattr(module, self._job_name.title().replace('_', ''))
         return job(**kwargs)
 
-    def _create_source(self, name, conf) -> Source:  # pylint: disable=no-self-use
+    def _create_source(self, name, conf) -> Source:  # noqa pylint: disable=no-self-use
+        if 'connection_type' in conf and conf['connection_type'] == 's3':
+            from dp.infra.aws import glue  # pylint: disable=import-outside-toplevel
+            return glue.GlueSource(**{'transformation_ctx': name, **conf})
+
         raise ValueError(f'Unsupported source: {name}')
 
-    def _create_sink(self, name, conf) -> Sink:  # pylint: disable=no-self-use
+    def _create_sink(self, name, conf) -> Sink:  # noqa pylint: disable=no-self-use
+        if 'connection_type' in conf and conf['connection_type'] == 's3':
+            from dp.infra.aws import glue  # pylint: disable=import-outside-toplevel
+            return glue.GlueSink(**{'transformation_ctx': name, **conf})
+
         raise ValueError(f'Unsupported sink: {name}')
 
     def _create_decorator(self, name, conf):  # pylint: disable=unused-argument

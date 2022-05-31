@@ -3,7 +3,7 @@ from unittest import mock
 
 import pytest
 
-from dp.core.spark import Job, Spark
+from dp.core.spark import Job, Spark, Source, Sink
 from dp.infra.factory import Factory
 
 
@@ -52,12 +52,79 @@ def test_create_job_unknown_args():
             Factory.create_job(mock_factory)
 
 
-def test_create_source():
-    pass
+def test_create_glue_source():
+    mock_factory = mock.Mock()
+    config = {'connection_type': 's3', 'format': 'csv'}
+
+    with mock.patch('dp.infra.aws.glue.GlueSource') as mock_glue_source_constructor:
+        mock_source = mock.Mock(spec=Source)
+        mock_glue_source_constructor.return_value = mock_source
+
+        actual = Factory._create_source(mock_factory, 'src_name', config)
+
+        assert actual == mock_source
+        mock_glue_source_constructor.assert_called_once_with(
+            connection_type='s3', format='csv', transformation_ctx='src_name')
 
 
-def test_create_sink():
-    pass
+def test_create_glue_source_with_transformation_ctx():
+    mock_factory = mock.Mock()
+    config = {'connection_type': 's3', 'format': 'csv', 'transformation_ctx': 'foo'}
+
+    with mock.patch('dp.infra.aws.glue.GlueSource') as mock_glue_source_constructor:
+        mock_source = mock.Mock(spec=Source)
+        mock_glue_source_constructor.return_value = mock_source
+
+        actual = Factory._create_source(mock_factory, 'src_name', config)
+
+        assert actual == mock_source
+        mock_glue_source_constructor.assert_called_once_with(
+            connection_type='s3', format='csv', transformation_ctx='foo')
+
+
+def test_create_unsupported_source():
+    mock_factory = mock.Mock()
+    config = {'foo': 'bar'}
+
+    with pytest.raises(ValueError):
+        Factory._create_source(mock_factory, 'src_name', config)
+
+
+def test_create_glue_sink():
+    mock_factory = mock.Mock()
+    config = {'connection_type': 's3', 'format': 'csv'}
+
+    with mock.patch('dp.infra.aws.glue.GlueSink') as mock_glue_sink_constructor:
+        mock_sink = mock.Mock(spec=Sink)
+        mock_glue_sink_constructor.return_value = mock_sink
+
+        actual = Factory._create_sink(mock_factory, 'snk_name', config)
+
+        assert actual == mock_sink
+        mock_glue_sink_constructor.assert_called_once_with(
+            connection_type='s3', format='csv', transformation_ctx='snk_name')
+
+
+def test_create_glue_sink_with_transformation_ctx():
+    mock_factory = mock.Mock()
+    config = {'connection_type': 's3', 'format': 'csv', 'transformation_ctx': ''}
+
+    with mock.patch('dp.infra.aws.glue.GlueSink') as mock_glue_sink_constructor:
+        mock_sink = mock.Mock(spec=Sink)
+        mock_glue_sink_constructor.return_value = mock_sink
+
+        actual = Factory._create_sink(mock_factory, 'snk_name', config)
+
+        assert actual == mock_sink
+        mock_glue_sink_constructor.assert_called_once_with(
+            connection_type='s3', format='csv', transformation_ctx='')
+
+
+def test_create_unsupported_sink():
+    mock_factory = mock.Mock()
+
+    with pytest.raises(ValueError):
+        Factory._create_sink(mock_factory, 'snk_name', {'foo': 'bar'})
 
 
 def test_create_decorator():
