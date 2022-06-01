@@ -8,7 +8,7 @@ from pyspark.sql.types import StructType
 from dp.core.spark import Spark, Source, Sink
 
 
-@pytest.fixture(scope='session', name='spark')
+@pytest.fixture(scope='module', name='spark')
 def spark_fixture():
     """ Create instance embedded spark fixture for testing """
 
