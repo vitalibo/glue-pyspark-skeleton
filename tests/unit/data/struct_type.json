@@ -1,0 +1,82 @@
+{
+  "fields": [
+    {
+      "name": "col1",
+      "type": "byte",
+      "nullable": false,
+      "metadata": {
+        "foo": "bar"
+      }
+    },
+    {
+      "name": "col2",
+      "type": "short"
+    },
+    {
+      "name": "col3",
+      "type": "integer"
+    },
+    {
+      "name": "col4",
+      "type": "long"
+    },
+    {
+      "name": "col5",
+      "type": "float"
+    },
+    {
+      "name": "col6",
+      "type": "double"
+    },
+    {
+      "name": "col7",
+      "type": "string"
+    },
+    {
+      "name": "col8",
+      "type": "boolean"
+    },
+    {
+      "name": "col9",
+      "type": "timestamp"
+    },
+    {
+      "name": "col10",
+      "type": "date"
+    },
+    {
+      "name": "col11",
+      "type": {
+        "containsNull": false,
+        "elementType": "string",
+        "type": "array"
+      }
+    },
+    {
+      "name": "col12",
+      "type": {
+        "fields": [
+          {
+            "name": "f1",
+            "type": "string"
+          },
+          {
+            "name": "f2",
+            "type": "integer"
+          }
+        ],
+        "type": "struct"
+      }
+    },
+    {
+      "name": "col13",
+      "type": {
+        "type": "map",
+        "keyType": "string",
+        "valueType": "integer",
+        "valueContainsNull": true
+      }
+    }
+  ],
+  "type": "struct"
+}
