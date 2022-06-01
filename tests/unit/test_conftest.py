@@ -3,6 +3,30 @@ import pytest
 from conftest import Helpers
 
 
+def test_create_source_from_resource(spark):
+    source = spark.create_source_from_resource(__file__, 'data/data_frame.json', 'data/data_frame_schema.json')
+
+    actual = source.extract(spark)
+
+    assert actual.toJSON().collect() == ['{"col1":"foo","col2":1}', '{"col1":"bar","col2":2}']
+
+
+def test_create_sink_from_resource(spark):
+    sink = spark.create_sink_from_resource(__file__, 'data/data_frame.json', 'data/data_frame_schema.json')
+    df = spark.create_data_frame([{'col1': 'foo', 'col2': 1}, {'col1': 'bar', 'col2': 2}])
+
+    sink.load(spark, df)
+
+
+def test_create_dataframe_from_resource(spark):
+    actual = spark.create_dataframe_from_resource(__file__, 'data/data_frame.json', 'data/data_frame_schema.json')
+
+    assert actual.count() == 2
+    assert actual.toJSON().collect() == ['{"col1":"foo","col2":1}', '{"col1":"bar","col2":2}']
+    assert actual.schema['col1'].dataType.typeName() == 'string'
+    assert actual.schema['col2'].dataType.typeName() == 'long'
+
+
 def test_resource():
     actual = Helpers.resource(__file__, 'foo.json')
 
