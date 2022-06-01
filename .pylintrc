@@ -61,7 +61,7 @@ callbacks =
     cb_,
     _cb
 dummy-variables-rgx = _|dummy
-ignored-argument-names = _.*|^ignored_?|^unused_?
+ignored-argument-names = _.*|^ignored_?|^unused_?|args|kwargs
 init-import = yes
 redefining-builtins-modules =
     six.moves,
