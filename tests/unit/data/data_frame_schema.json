@@ -7,6 +7,14 @@
     {
       "name": "col2",
       "type": "long"
+    },
+    {
+      "name": "col3",
+      "type": "timestamp"
+    },
+    {
+      "name": "col4",
+      "type": "date"
     }
   ],
   "type": "struct"

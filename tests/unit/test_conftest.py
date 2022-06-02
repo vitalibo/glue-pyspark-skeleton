@@ -1,3 +1,5 @@
+from datetime import datetime, date, timezone
+
 import pytest
 
 from conftest import Helpers
@@ -8,12 +10,18 @@ def test_create_source_from_resource(spark):
 
     actual = source.extract(spark)
 
-    assert actual.toJSON().collect() == ['{"col1":"foo","col2":1}', '{"col1":"bar","col2":2}']
+    assert actual.toJSON().collect() == [
+        '{"col1":"foo","col2":1,"col3":"2022-06-01T12:34:56.789Z"}',
+        '{"col1":"bar","col2":2,"col4":"2022-06-02"}'
+    ]
 
 
 def test_create_sink_from_resource(spark):
     sink = spark.create_sink_from_resource(__file__, 'data/data_frame.json', 'data/data_frame_schema.json')
-    df = spark.create_data_frame([{'col1': 'foo', 'col2': 1}, {'col1': 'bar', 'col2': 2}])
+    df = spark.create_data_frame([
+        {'col1': 'foo', 'col2': 1, 'col3': datetime(2022, 6, 1, 12, 34, 56, 789000, tzinfo=timezone.utc)},
+        {'col1': 'bar', 'col2': 2, 'col4': date(2022, 6, 2)}
+    ])
 
     sink.load(spark, df)
 
@@ -22,9 +30,14 @@ def test_create_dataframe_from_resource(spark):
     actual = spark.create_dataframe_from_resource(__file__, 'data/data_frame.json', 'data/data_frame_schema.json')
 
     assert actual.count() == 2
-    assert actual.toJSON().collect() == ['{"col1":"foo","col2":1}', '{"col1":"bar","col2":2}']
+    assert actual.toJSON().collect() == [
+        '{"col1":"foo","col2":1,"col3":"2022-06-01T12:34:56.789Z"}',
+        '{"col1":"bar","col2":2,"col4":"2022-06-02"}'
+    ]
     assert actual.schema['col1'].dataType.typeName() == 'string'
     assert actual.schema['col2'].dataType.typeName() == 'long'
+    assert actual.schema['col3'].dataType.typeName() == 'timestamp'
+    assert actual.schema['col4'].dataType.typeName() == 'date'
 
 
 def test_resource():

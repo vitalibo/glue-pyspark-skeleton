@@ -1,5 +1,6 @@
 import json
 import os
+from operator import itemgetter
 
 import pytest
 from pyspark.sql import SparkSession, DataFrame
@@ -55,10 +56,16 @@ class EmbeddedSpark(Spark):
     def create_dataframe_from_resource(self, root, path, schema, *args, **kwargs) -> DataFrame:
         """ Creates DataFrame from resources for testing """
 
-        df = self.create_data_frame(
-            Helpers.resource_as_json(root, path),
-            Helpers.json_as_struct_type(
-                Helpers.resource_as_json(root, schema)))
+        rdd = self \
+            .spark_context \
+            .wholeTextFiles(Helpers.resource(root, path), 1) \
+            .map(itemgetter(1))
+
+        df = self \
+            .spark_session.read \
+            .option('multiLine', True) \
+            .schema(Helpers.resource_as_struct_type(root, schema)) \
+            .json(rdd)
 
         return df
 
@@ -92,15 +99,11 @@ class Helpers:
         return json.dumps(Helpers.resource_as_json(root, path))
 
     @staticmethod
-    def assert_dataframe_equals(actual, expected, *args, ignore_schema=False, order_by=None, **kwargs):
-        """ Check that the DataFrames is equals """
+    def resource_as_struct_type(root, path):
+        """ Returns resource as StructType """
 
-        if order_by is not None:
-            actual = actual.orderBy(*order_by)
-
-        if not ignore_schema:
-            assert actual.schema == expected.schema
-        assert actual.collect() == expected.collect()
+        return Helpers.json_as_struct_type(
+            Helpers.resource_as_json(root, path))
 
     @staticmethod
     def json_as_struct_type(schema):
@@ -122,3 +125,14 @@ class Helpers:
             return node
 
         return StructType.fromJson(fill_nullable_fields(schema))
+
+    @staticmethod
+    def assert_dataframe_equals(actual, expected, *args, ignore_schema=False, order_by=None, **kwargs):
+        """ Check that the DataFrames is equals """
+
+        if order_by is not None:
+            actual = actual.orderBy(*order_by)
+
+        if not ignore_schema:
+            assert actual.schema == expected.schema
+        assert actual.collect() == expected.collect()
