@@ -1,0 +1,23 @@
+[
+  {
+    "name": "Olivia",
+    "age": 30,
+    "gender": "F",
+    "dept_id": "dev0",
+    "salary": 3200.0
+  },
+  {
+    "name": "Sophia",
+    "age": 30,
+    "gender": "F",
+    "dept_id": "dev0",
+    "salary": 4900.0
+  },
+  {
+    "name": "Charlotte",
+    "age": 30,
+    "gender": "F",
+    "dept_id": "dev0",
+    "salary": 4200.0
+  }
+]

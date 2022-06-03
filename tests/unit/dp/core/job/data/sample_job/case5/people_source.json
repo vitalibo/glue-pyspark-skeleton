@@ -1,0 +1,16 @@
+[
+  {
+    "name": "Fabien",
+    "age": 38,
+    "gender": "M",
+    "dept_id": "dev0",
+    "salary": 3800.0
+  },
+  {
+    "name": "Amelia",
+    "age": 31,
+    "gender": "F",
+    "dept_id": "dev0",
+    "salary": 5100.0
+  }
+]

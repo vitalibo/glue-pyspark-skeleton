@@ -29,6 +29,14 @@ def helpers_fixture():
     return Helpers
 
 
+def marker_cases(*args):
+    """ Decorator for parametrizing test functions """
+
+    return pytest.mark.parametrize('case', [
+        pytest.param(f'case{i}', id=item) for i, item in enumerate(args)
+    ])
+
+
 class EmbeddedSpark(Spark):
     """ Decorator for Spark with additional functionality for testing """
 
@@ -136,3 +144,6 @@ class Helpers:
         if not ignore_schema:
             assert actual.schema == expected.schema
         assert actual.collect() == expected.collect()
+
+
+pytest.mark.cases = marker_cases

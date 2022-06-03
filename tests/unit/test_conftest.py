@@ -119,3 +119,10 @@ def test_json_as_struct_type():
     assert actual['col11'].dataType.simpleString() == 'array<string>'
     assert actual['col12'].dataType.simpleString() == 'struct<f1:string,f2:int>'
     assert actual['col13'].dataType.simpleString() == 'map<string,int>'
+
+
+def test_mark_cases():
+    actual = pytest.mark.cases('foo', 'bar')
+
+    assert isinstance(actual, pytest.MarkDecorator)
+    assert actual.mark.args == ('case', [pytest.param('case0', id='foo'), pytest.param('case1', id='bar')])
