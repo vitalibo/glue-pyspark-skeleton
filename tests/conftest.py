@@ -75,6 +75,14 @@ class EmbeddedSpark(Spark):
             .schema(Helpers.resource_as_struct_type(root, schema)) \
             .json(rdd)
 
+        # This functionality allows reformat your DataFrame json file according to schema.
+        #
+        # WARNING: This code sample will override your original JSON file!
+        #
+        # formatted_json = json.dumps(json.loads(str(df.toJSON().collect()).replace("'", '')), indent=2)
+        # with open(Helpers.resource(root, path), 'w', encoding='utf-8') as f:
+        #     f.write(formatted_json + '\n')
+
         return df
 
 
