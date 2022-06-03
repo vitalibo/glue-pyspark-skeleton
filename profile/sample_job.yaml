@@ -1,0 +1,24 @@
+sample_job:
+  properties:
+    "spark.sql.session.timeZone": "UTC"
+  kwargs:
+    people_source@source:
+      connection_type: s3
+      connection_options:
+        paths:
+          - 's3://${bucket_name}/${environment}/data/people_source.json'
+      format: json
+    department_source@source:
+      connection_type: s3
+      connection_options:
+        paths:
+          - 's3://${bucket_name}/${environment}/data/department_source.json'
+      format: json
+    wage_sink@sink:
+      connection_type: s3
+      connection_options:
+        path: 's3://${bucket_name}/${environment}/data/output/'
+      format: csv
+      format_options:
+        separator: ','
+    threshold: 30

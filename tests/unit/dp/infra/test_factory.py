@@ -152,16 +152,16 @@ def test_parse_kwargs():
     config = {
         'kwargs': {
             'foo': 123,
-            'bar': {'__create': 'type1'},
-            'baz': {'__create': 'type2'},
+            'bar@type1': {'foo': 'type1'},
+            'baz@type2': {'bar': 'type2'},
             'tar': {'far': 123}
         }
     }
 
     actual = Factory._parse_kwargs(mock_factory, config)
 
-    mock_factory._create_type1.assert_called_once_with('bar', {'__create': 'type1'})
-    mock_factory._create_type2.assert_called_once_with('baz', {'__create': 'type2'})
+    mock_factory._create_type1.assert_called_once_with('bar', {'foo': 'type1'})
+    mock_factory._create_type2.assert_called_once_with('baz', {'bar': 'type2'})
     assert actual == {
         'foo': 123,
         'bar': 'abc',

@@ -63,8 +63,9 @@ class Factory:
     def _parse_kwargs(self, super_conf):
         kwargs = {}
         for name, conf in super_conf['kwargs'].items():
-            if isinstance(conf, dict) and '__create' in conf:
-                method = getattr(self, f'_create_{conf["__create"]}')
+            name, *method_name = name.split('@')
+            if len(method_name) > 0:
+                method = getattr(self, f'_create_{method_name[0]}')
                 kwargs[name] = method(name, conf)
             else:
                 kwargs[name] = conf
