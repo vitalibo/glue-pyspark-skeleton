@@ -7,7 +7,10 @@ checkstyle:
 test:
 	PYTHONPATH="$$PYTHONPATH:./src/" pytest -p no:cacheprovider ./tests/
 
-clean:
-	rm -rf ./.pytest_cache
+build:
+	python3 setup.py bdist_wheel
 
-.PHONY: init checkstyle test
+clean:
+	rm -rf ./.pytest_cache ./build ./dist ./src/glue_pyspark_skeleton.egg-info
+
+.PHONY: init checkstyle test build clean

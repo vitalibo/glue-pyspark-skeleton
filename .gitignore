@@ -1,3 +1,8 @@
 .idea/
 .DS_Store
 *.iml
+.terraform/
+.terraform.lock.hcl
+*.egg-info/
+build/
+dist/
