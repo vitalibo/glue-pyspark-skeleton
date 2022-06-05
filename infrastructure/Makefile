@@ -25,7 +25,6 @@ configure:
     TF_ENV_VARS := $(TF_ENV_VARS) TF_DATA_DIR="$(CURDIR)/.terraform/$(environment)"
     # TF_ENV_VARS := $(TF_ENV_VARS) TF_LOG=DEBUG
 
-    TF_OPTIONS := $(TF_OPTIONS) -var="environment=$(environment)"
     TF_OPTIONS := $(TF_OPTIONS) -var="profile=$(profile)"
     TF_OPTIONS := $(TF_OPTIONS) -var="script_home=s3://$(call tfvar,bucket_name)/$(environment)/$(call tfvar,name)/$(version)"
 
@@ -55,7 +54,7 @@ apply: init
 destroy: init
 	$(TF_ENV_VARS) terraform destroy $(TF_OPTIONS) $(TF_RUN_CONF)
 
-output: init
-	$(TF_ENV_VARS) terraform output $(TF_OUT_CONF)
+output:
+	@$(TF_ENV_VARS) terraform output $(TF_OUT_CONF)
 
 .PHONY: help init plan apply destroy output
