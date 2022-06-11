@@ -1,5 +1,6 @@
 import logging
 import sys
+import traceback
 
 from dp.infra.factory import Factory
 
@@ -17,6 +18,7 @@ def main(argv):
 
     except Exception as e:
         logging.fatal('Unexpected error')
+        traceback.print_exc()
         raise e
 
 

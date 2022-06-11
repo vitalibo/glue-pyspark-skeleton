@@ -66,6 +66,7 @@ def boto3_session_fixture(infra_props):
 def glue_job_executor_fixture(boto3_session, infra_props):
     yield GlueJobExecutor(
         boto3_session.client('glue'),
+        boto3_session.client('logs'),
         infra_props['jobs'])
 
 
@@ -136,8 +137,9 @@ class TerraformProxy:
 class GlueJobExecutor:
     """ Provide interface for submit and manage AWS Glue Jobs """
 
-    def __init__(self, glue, jobs):
+    def __init__(self, glue, logs, jobs):
         self._glue = glue
+        self._logs = logs
         self.jobs = jobs
         self._max_attempts = 6
         self._delay = 20
@@ -170,9 +172,19 @@ class GlueJobExecutor:
 
             time.sleep(self._delay)
 
-        if state != 'SUCCEEDED':
-            error_message = response['JobRun']['ErrorMessage']
-            raise GlueJobExecutionException(f'Job has {state}. {error_message}')
+        if state == 'SUCCEEDED':
+            return None
+
+        try:
+            logs = self._logs.get_log_events(
+                logGroupName='/aws-glue/jobs/output', logStreamName=job_run_id, startFromHead=False)
+            for event in logs['events']:
+                print(event['message'], end='')
+        except self._logs.exceptions.ResourceNotFoundException:
+            pass
+
+        error_message = response['JobRun'].get('ErrorMessage', None)
+        raise GlueJobExecutionException(error_message if error_message else state)
 
     def reset_job_bookmark(self, job_name=None):
         jobs = self.jobs

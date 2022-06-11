@@ -50,13 +50,15 @@ def test_terraform_execute(mock_popen):
     mock_subprocess.communicate.return_value = ('output', 'error')
     mock_subprocess.returncode = 0
 
-    actual = terraform._execute('apply')
+    with mock.patch('time.time') as mock_time:
+        mock_time.return_value = 12.34
+        actual = terraform._execute('apply')
 
     assert actual == ('output', 'error')
     mock_subprocess.communicate.assert_called_once()
     mock_subprocess.__enter__.assert_called_once()
     args = mock_popen.call_args
-    assert args[1]['args'] == 'make apply environment=dev-1q2w3e profile=my auto_approve=true'.split(' ')
+    assert args[1]['args'] == 'make apply environment=dev-1q2w3e profile=my auto_approve=true version=12.34'.split(' ')
     assert str(args[1]['cwd']).endswith('/infrastructure')
 
 
@@ -93,7 +95,7 @@ def test_terraform_update_tfvars(mock_fileinput, mock_write, mock_open):
 
 
 def test_glue_find_job():
-    job_executor = GlueJobExecutor(mock.Mock(), ['vb-dev-sample-job'])
+    job_executor = GlueJobExecutor(mock.Mock(), mock.Mock(), ['vb-dev-sample-job'])
 
     actual = job_executor.find_job('sample-job')
 
@@ -101,7 +103,7 @@ def test_glue_find_job():
 
 
 def test_glue_find_unknown_job():
-    job_executor = GlueJobExecutor(mock.Mock(), ['vb-dev-sample-job'])
+    job_executor = GlueJobExecutor(mock.Mock(), mock.Mock(), ['vb-dev-sample-job'])
 
     with pytest.raises(ValueError):
         job_executor.find_job('unknown-job')
@@ -109,7 +111,7 @@ def test_glue_find_unknown_job():
 
 def test_reset_job_bookmarks():
     mock_glue = mock.Mock()
-    job_executor = GlueJobExecutor(mock_glue, ['vb-dev-foo-job', 'vb-dev-bar-job'])
+    job_executor = GlueJobExecutor(mock_glue, mock.Mock(), ['vb-dev-foo-job', 'vb-dev-bar-job'])
 
     job_executor.reset_job_bookmark()
 
@@ -121,7 +123,7 @@ def test_reset_job_bookmarks():
 
 def test_reset_job_bookmark():
     mock_glue = mock.Mock()
-    job_executor = GlueJobExecutor(mock_glue, ['vb-dev-foo-job', 'vb-dev-bar-job'])
+    job_executor = GlueJobExecutor(mock_glue, mock.Mock(), ['vb-dev-foo-job', 'vb-dev-bar-job'])
 
     job_executor.reset_job_bookmark('foo-job')
 
@@ -134,7 +136,7 @@ def test_glue_submit(mock_sleep):
     mock_glue.start_job_run.return_value = {'JobRunId': 'run#1'}
     mock_glue.get_job_run.side_effect = \
         [{'JobRun': {'JobRunState': o}} for o in ('STARTING', 'RUNNING', 'RUNNING', 'SUCCEEDED')]
-    job_executor = GlueJobExecutor(mock_glue, ['vb-dev-sample-job'])
+    job_executor = GlueJobExecutor(mock_glue, mock.Mock(), ['vb-dev-sample-job'])
 
     job_executor.submit('sample-job')
 
@@ -148,10 +150,12 @@ def test_glue_submit(mock_sleep):
 @mock.patch('time.sleep')
 def test_glue_submit_job_failed(mock_sleep):
     mock_glue = mock.Mock()
+    mock_logs = mock.Mock()
     mock_glue.start_job_run.return_value = {'JobRunId': 'run#1'}
     mock_glue.get_job_run.side_effect = \
         [{'JobRun': {'JobRunState': o}} for o in ('STARTING', 'RUNNING', 'FAILED')]
-    job_executor = GlueJobExecutor(mock_glue, ['vb-dev-sample-job'])
+    mock_logs.get_log_events.return_value = {'events': [{'message': 'foo'}]}
+    job_executor = GlueJobExecutor(mock_glue, mock_logs, ['vb-dev-sample-job'])
 
     with pytest.raises(GlueJobExecutionException):
         job_executor.submit('sample-job')
@@ -161,6 +165,8 @@ def test_glue_submit_job_failed(mock_sleep):
     assert len(mock_glue.get_job_run.call_args_list) == 3
     mock_glue.get_job_run.assert_called_with(JobName='vb-dev-sample-job', RunId='run#1')
     mock_sleep.assert_called_with(20)
+    mock_logs.get_log_events.assert_called_with(
+        logGroupName='/aws-glue/jobs/output', logStreamName='run#1', startFromHead=False)
 
 
 @mock.patch('time.sleep')
@@ -171,7 +177,7 @@ def test_glue_submit_job_retry(mock_sleep):
         [ConcurrentRunsExceededException, ConcurrentRunsExceededException, {'JobRunId': 'run#1'}]
     mock_glue.get_job_run.side_effect = \
         [{'JobRun': {'JobRunState': o}} for o in ('STARTING', 'RUNNING', 'RUNNING', 'SUCCEEDED')]
-    job_executor = GlueJobExecutor(mock_glue, ['vb-dev-sample-job'])
+    job_executor = GlueJobExecutor(mock_glue, mock.Mock(), ['vb-dev-sample-job'])
 
     job_executor.submit('sample-job')
 
@@ -190,7 +196,7 @@ def test_glue_submit_job_not_started(mock_sleep):
     mock_glue.start_job_run.side_effect = ConcurrentRunsExceededException
     mock_glue.get_job_run.side_effect = \
         [{'JobRun': {'JobRunState': o}} for o in ('STARTING', 'RUNNING', 'RUNNING', 'SUCCEEDED')]
-    job_executor = GlueJobExecutor(mock_glue, ['vb-dev-sample-job'])
+    job_executor = GlueJobExecutor(mock_glue, mock.Mock(), ['vb-dev-sample-job'])
 
     with pytest.raises(ConcurrentRunsExceededException):
         job_executor.submit('sample-job')
