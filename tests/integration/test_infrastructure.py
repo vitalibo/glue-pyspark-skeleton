@@ -3,7 +3,7 @@ from unittest import mock
 
 import pytest
 
-from integration._infrastructure import TerraformProxy
+from integration._infrastructure import TerraformProxy, GlueJobExecutor, GlueJobExecutionException
 
 
 # pylint: disable=protected-access
@@ -90,3 +90,116 @@ def test_terraform_update_tfvars(mock_fileinput, mock_write, mock_open):
     mock_write.assert_called_once_with('env = "dev"')
     mock_open.assert_called_once_with('test.tfvars', 'a', encoding='utf-8')
     mock_file.write.assert_called_once_with('foo = "bar-baz"\n')
+
+
+def test_glue_find_job():
+    job_executor = GlueJobExecutor(mock.Mock(), ['vb-dev-sample-job'])
+
+    actual = job_executor.find_job('sample-job')
+
+    assert actual == 'vb-dev-sample-job'
+
+
+def test_glue_find_unknown_job():
+    job_executor = GlueJobExecutor(mock.Mock(), ['vb-dev-sample-job'])
+
+    with pytest.raises(ValueError):
+        job_executor.find_job('unknown-job')
+
+
+def test_reset_job_bookmarks():
+    mock_glue = mock.Mock()
+    job_executor = GlueJobExecutor(mock_glue, ['vb-dev-foo-job', 'vb-dev-bar-job'])
+
+    job_executor.reset_job_bookmark()
+
+    calls = mock_glue.reset_job_bookmark.call_args_list
+    assert len(calls) == 2
+    assert calls[0][1] == {'JobName': 'vb-dev-foo-job'}
+    assert calls[1][1] == {'JobName': 'vb-dev-bar-job'}
+
+
+def test_reset_job_bookmark():
+    mock_glue = mock.Mock()
+    job_executor = GlueJobExecutor(mock_glue, ['vb-dev-foo-job', 'vb-dev-bar-job'])
+
+    job_executor.reset_job_bookmark('foo-job')
+
+    mock_glue.reset_job_bookmark.assert_called_once_with(JobName='vb-dev-foo-job')
+
+
+@mock.patch('time.sleep')
+def test_glue_submit(mock_sleep):
+    mock_glue = mock.Mock()
+    mock_glue.start_job_run.return_value = {'JobRunId': 'run#1'}
+    mock_glue.get_job_run.side_effect = \
+        [{'JobRun': {'JobRunState': o}} for o in ('STARTING', 'RUNNING', 'RUNNING', 'SUCCEEDED')]
+    job_executor = GlueJobExecutor(mock_glue, ['vb-dev-sample-job'])
+
+    job_executor.submit('sample-job')
+
+    mock_glue.start_job_run.assert_called_once_with(
+        JobName='vb-dev-sample-job', Timeout=5, WorkerType='G.1X', NumberOfWorkers=2)
+    assert len(mock_glue.get_job_run.call_args_list) == 4
+    mock_glue.get_job_run.assert_called_with(JobName='vb-dev-sample-job', RunId='run#1')
+    mock_sleep.assert_called_with(20)
+
+
+@mock.patch('time.sleep')
+def test_glue_submit_job_failed(mock_sleep):
+    mock_glue = mock.Mock()
+    mock_glue.start_job_run.return_value = {'JobRunId': 'run#1'}
+    mock_glue.get_job_run.side_effect = \
+        [{'JobRun': {'JobRunState': o}} for o in ('STARTING', 'RUNNING', 'FAILED')]
+    job_executor = GlueJobExecutor(mock_glue, ['vb-dev-sample-job'])
+
+    with pytest.raises(GlueJobExecutionException):
+        job_executor.submit('sample-job')
+
+    mock_glue.start_job_run.assert_called_once_with(
+        JobName='vb-dev-sample-job', Timeout=5, WorkerType='G.1X', NumberOfWorkers=2)
+    assert len(mock_glue.get_job_run.call_args_list) == 3
+    mock_glue.get_job_run.assert_called_with(JobName='vb-dev-sample-job', RunId='run#1')
+    mock_sleep.assert_called_with(20)
+
+
+@mock.patch('time.sleep')
+def test_glue_submit_job_retry(mock_sleep):
+    mock_glue = mock.Mock()
+    mock_glue.exceptions.ConcurrentRunsExceededException = ConcurrentRunsExceededException
+    mock_glue.start_job_run.side_effect = \
+        [ConcurrentRunsExceededException, ConcurrentRunsExceededException, {'JobRunId': 'run#1'}]
+    mock_glue.get_job_run.side_effect = \
+        [{'JobRun': {'JobRunState': o}} for o in ('STARTING', 'RUNNING', 'RUNNING', 'SUCCEEDED')]
+    job_executor = GlueJobExecutor(mock_glue, ['vb-dev-sample-job'])
+
+    job_executor.submit('sample-job')
+
+    assert len(mock_glue.start_job_run.call_args_list) == 3
+    mock_glue.start_job_run.assert_called_with(
+        JobName='vb-dev-sample-job', Timeout=5, WorkerType='G.1X', NumberOfWorkers=2)
+    assert len(mock_glue.get_job_run.call_args_list) == 4
+    mock_glue.get_job_run.assert_called_with(JobName='vb-dev-sample-job', RunId='run#1')
+    mock_sleep.assert_called_with(20)
+
+
+@mock.patch('time.sleep')
+def test_glue_submit_job_not_started(mock_sleep):
+    mock_glue = mock.Mock()
+    mock_glue.exceptions.ConcurrentRunsExceededException = ConcurrentRunsExceededException
+    mock_glue.start_job_run.side_effect = ConcurrentRunsExceededException
+    mock_glue.get_job_run.side_effect = \
+        [{'JobRun': {'JobRunState': o}} for o in ('STARTING', 'RUNNING', 'RUNNING', 'SUCCEEDED')]
+    job_executor = GlueJobExecutor(mock_glue, ['vb-dev-sample-job'])
+
+    with pytest.raises(ConcurrentRunsExceededException):
+        job_executor.submit('sample-job')
+
+    assert len(mock_glue.start_job_run.call_args_list) == 6
+    mock_glue.start_job_run.assert_called_with(
+        JobName='vb-dev-sample-job', Timeout=5, WorkerType='G.1X', NumberOfWorkers=2)
+    mock_sleep.assert_called_with(20)
+
+
+class ConcurrentRunsExceededException(Exception):
+    """ Internal class used for tests """

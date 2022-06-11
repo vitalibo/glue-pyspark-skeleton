@@ -11,7 +11,9 @@ from integration._infrastructure import (  # noqa pylint: disable=unused-import
     pytest_addoption,
     pytest_configure,
     pytest_collection_modifyitems,
-    terraform_fixture
+    terraform_fixture,
+    boto3_session_fixture,
+    glue_job_executor_fixture
 )
 
 

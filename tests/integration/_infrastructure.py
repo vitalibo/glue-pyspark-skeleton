@@ -6,8 +6,10 @@ import shutil
 import string
 import subprocess
 import sys
+import time
 from pathlib import Path
 
+import boto3
 import pytest
 
 
@@ -39,7 +41,7 @@ def pytest_collection_modifyitems(config, items):
         items[:] = remaining
 
 
-@pytest.fixture(scope='session', name='terraform')
+@pytest.fixture(scope='session', name='infra_props')
 def terraform_fixture(pytestconfig):
     config = {k: pytestconfig.getoption(k) for k in ('environment', 'profile', 'execution_id')}
     if config['environment'] is None:
@@ -51,6 +53,20 @@ def terraform_fixture(pytestconfig):
         yield output
     finally:
         terraform.destroy()
+
+
+@pytest.fixture(scope='session', name='boto3_session')
+def boto3_session_fixture(infra_props):
+    yield boto3.session.Session(
+        profile_name=infra_props['profile'],
+        region_name=infra_props['region'])
+
+
+@pytest.fixture(scope='session', name='glue')
+def glue_job_executor_fixture(boto3_session, infra_props):
+    yield GlueJobExecutor(
+        boto3_session.client('glue'),
+        infra_props['jobs'])
 
 
 class TerraformProxy:
@@ -87,7 +103,8 @@ class TerraformProxy:
         options = {
             'environment': self._environment,
             'profile': self._profile,
-            'auto_approve': 'true'
+            'auto_approve': 'true',
+            'version': time.time()
         }
 
         command = f'make {command} ' + ' '.join([f'{k}={v}' for k, v in options.items()])
@@ -114,3 +131,66 @@ class TerraformProxy:
         with open(path, 'a', encoding='utf-8') as file:
             for key, value in variables.items():
                 file.write(f'{key} = {value}\n')
+
+
+class GlueJobExecutor:
+    """ Provide interface for submit and manage AWS Glue Jobs """
+
+    def __init__(self, glue, jobs):
+        self._glue = glue
+        self.jobs = jobs
+        self._max_attempts = 6
+        self._delay = 20
+
+    def submit(self, job_name, attempt=1, **kwargs):
+        job_name = self.find_job(job_name)
+        params = {
+            'Timeout': kwargs.get('Timeout', 5),
+            'WorkerType': kwargs.get('WorkerType', 'G.1X'),
+            'NumberOfWorkers': kwargs.get('NumberOfWorkers', 2)
+        }
+
+        try:
+            response = self._glue.start_job_run(JobName=job_name, **params)
+            job_run_id = response['JobRunId']
+        except self._glue.exceptions.ConcurrentRunsExceededException as e:
+            if attempt >= self._max_attempts:
+                raise e
+
+            print(f'{job_name} [WAITING]')
+            time.sleep(self._delay)
+            return self.submit(job_name, attempt=attempt + 1, **kwargs)
+
+        while True:
+            response = self._glue.get_job_run(JobName=job_name, RunId=job_run_id)
+            state = response['JobRun']['JobRunState']
+            print(f'{job_name} [{state}]')
+            if state not in ('STARTING', 'RUNNING', 'STOPPING'):
+                break
+
+            time.sleep(self._delay)
+
+        if state != 'SUCCEEDED':
+            error_message = response['JobRun']['ErrorMessage']
+            raise GlueJobExecutionException(f'Job has {state}. {error_message}')
+
+    def reset_job_bookmark(self, job_name=None):
+        jobs = self.jobs
+        if job_name:
+            jobs = [self.find_job(job_name)]
+
+        for job in jobs:
+            try:
+                self._glue.reset_job_bookmark(JobName=job)
+            except self._glue.exceptions.EntityNotFoundException:
+                pass
+
+    def find_job(self, job_name):
+        for job in self.jobs:
+            if job.endswith(job_name):
+                return job
+        raise ValueError('Unknown job')
+
+
+class GlueJobExecutionException(Exception):
+    """ Raises when AWS Glue job finished with non-success state """
