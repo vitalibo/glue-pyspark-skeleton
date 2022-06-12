@@ -14,6 +14,7 @@ data "template_file" "config" {
   template = join("\n---\n", [for name in fileset("${path.module}/../profile/", "*") : file("${path.module}/../profile/${name}")])
   vars     = {
     environment = var.environment
+    name        = var.name
     bucket_name = var.bucket_name
   }
 }
