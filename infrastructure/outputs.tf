@@ -24,3 +24,8 @@ output "jobs" {
     module.sample_job.job_id
   ]
 }
+
+output "data_catalog" {
+  description = "Name of the Glue data catalog"
+  value       = aws_glue_catalog_database.data_lake.name
+}

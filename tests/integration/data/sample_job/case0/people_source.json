@@ -1,0 +1,86 @@
+[
+  {
+    "name": "Olivia",
+    "age": 25,
+    "gender": "F",
+    "dept_id": "d7a6",
+    "salary": 3200.0
+  },
+  {
+    "name": "Sophia",
+    "age": 44,
+    "gender": "F",
+    "dept_id": "4a42",
+    "salary": 4900.0
+  },
+  {
+    "name": "Charly",
+    "age": 25,
+    "gender": "M",
+    "dept_id": "bc5f",
+    "salary": 2500.0
+  },
+  {
+    "name": "Charlotte",
+    "age": 35,
+    "gender": "F",
+    "dept_id": "c58o",
+    "salary": 4100.0
+  },
+  {
+    "name": "Fabien",
+    "age": 38,
+    "gender": "M",
+    "dept_id": "bc5f",
+    "salary": 3800.0
+  },
+  {
+    "name": "Sam",
+    "age": 31,
+    "gender": "M",
+    "dept_id": "4a42",
+    "salary": 5000.0
+  },
+  {
+    "name": "Amelia",
+    "age": 31,
+    "gender": "F",
+    "dept_id": "bc5f",
+    "salary": 5100.0
+  },
+  {
+    "name": "Isabella",
+    "age": 26,
+    "gender": "F",
+    "dept_id": "c58o",
+    "salary": 3000.0
+  },
+  {
+    "name": "Sam",
+    "age": 25,
+    "gender": "M",
+    "dept_id": "bc5f",
+    "salary": 3000.0
+  },
+  {
+    "name": "Nick",
+    "age": 39,
+    "gender": "M",
+    "dept_id": "4a42",
+    "salary": 4800.0
+  },
+  {
+    "name": "Nick",
+    "age": 30,
+    "gender": "M",
+    "dept_id": "bc5f",
+    "salary": 4200.0
+  },
+  {
+    "name": "Mia",
+    "age": 41,
+    "gender": "F",
+    "dept_id": "d7a6",
+    "salary": 2800.0
+  }
+]

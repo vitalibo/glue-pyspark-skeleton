@@ -1,0 +1,32 @@
+[
+  {
+    "id": "cf41",
+    "name": "Accounts and Finance",
+    "unit": "Finance"
+  },
+  {
+    "id": "d7a6",
+    "name": "HR",
+    "unit": "Development"
+  },
+  {
+    "id": "4a42",
+    "name": "Sales and marketing",
+    "unit": "Sales"
+  },
+  {
+    "id": "a826",
+    "name": "Accounts and Finance",
+    "unit": "Sales"
+  },
+  {
+    "id": "bc5f",
+    "name": "IT services",
+    "unit": "Development"
+  },
+  {
+    "id": "c58o",
+    "name": "IT services",
+    "unit": "Infrastructure"
+  }
+]

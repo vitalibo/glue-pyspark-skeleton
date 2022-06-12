@@ -7,6 +7,9 @@ from pyspark.sql import SparkSession, DataFrame
 from pyspark.sql.types import StructType
 
 from dp.core.spark import Spark, Source, Sink
+from integration._data_catalog import (  # noqa pylint: disable=unused-import
+    data_catalog_fixture
+)
 from integration._infrastructure import (  # noqa pylint: disable=unused-import
     pytest_addoption,
     pytest_configure,
@@ -30,7 +33,7 @@ def spark_fixture():
         yield instance
 
 
-@pytest.fixture(name='helpers')
+@pytest.fixture(scope='session', name='helpers')
 def helpers_fixture():
     """ Create helpers fixture for testing """
 

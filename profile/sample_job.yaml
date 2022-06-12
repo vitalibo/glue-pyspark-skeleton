@@ -6,7 +6,7 @@ sample_job:
       connection_type: s3
       connection_options:
         paths:
-          - 's3://${bucket_name}/${name}/data/data/peoples/'
+          - 's3://${bucket_name}/${name}/data/peoples/'
       format: json
     department_source@source:
       connection_type: s3

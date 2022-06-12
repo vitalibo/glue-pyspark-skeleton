@@ -84,8 +84,9 @@ resource "aws_glue_catalog_table" "wages" {
   database_name = aws_glue_catalog_database.data_lake.name
   name          = "wages"
   parameters    = {
-    "classification" = "csv"
-    delimiter        = "\t"
+    classification           = "csv"
+    delimiter                = ","
+    "skip.header.line.count" = "1"
   }
 
   storage_descriptor {
@@ -98,7 +99,8 @@ resource "aws_glue_catalog_table" "wages" {
       serialization_library = "org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe"
 
       parameters = {
-        "field.delim" = "\t"
+        "field.delim"            = ","
+        "skip.header.line.count" = "1"
       }
     }
 
