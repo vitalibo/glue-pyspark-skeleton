@@ -108,7 +108,7 @@ class TerraformProxy:
             'version': time.time()
         }
 
-        command = f'make {command} ' + ' '.join([f'{k}={v}' for k, v in options.items()])
+        command = f'make {command} --no-print-directory ' + ' '.join([f'{k}={v}' for k, v in options.items()])
 
         with subprocess.Popen(args=command.split(), cwd=self._workdir, **kwargs) as process:
             our, err = process.communicate()

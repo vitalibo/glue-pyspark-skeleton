@@ -58,7 +58,8 @@ def test_terraform_execute(mock_popen):
     mock_subprocess.communicate.assert_called_once()
     mock_subprocess.__enter__.assert_called_once()
     args = mock_popen.call_args
-    assert args[1]['args'] == 'make apply environment=dev-1q2w3e profile=my auto_approve=true version=12.34'.split(' ')
+    assert args[1]['args'] == 'make apply --no-print-directory ' \
+                              'environment=dev-1q2w3e profile=my auto_approve=true version=12.34'.split(' ')
     assert str(args[1]['cwd']).endswith('/infrastructure')
 
 
