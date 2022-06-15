@@ -84,8 +84,6 @@ class TerraformProxy:
 
     def apply(self):
         variables = {
-            'environment': '"%s-test"',
-            'name': f'"{self._execution_id}-%s"'
         }
 
         shutil.copyfile(self._parent_tfvars, self._tfvars)

@@ -25,6 +25,7 @@ configure:
     TF_ENV_VARS := $(TF_ENV_VARS) TF_DATA_DIR="$(CURDIR)/.terraform/$(environment)"
     # TF_ENV_VARS := $(TF_ENV_VARS) TF_LOG=DEBUG
 
+    TF_OPTIONS := $(TF_OPTIONS) -var="environment=$(environment)"
     TF_OPTIONS := $(TF_OPTIONS) -var="profile=$(profile)"
     TF_OPTIONS := $(TF_OPTIONS) -var="script_home=s3://$(call tfvar,bucket_name)/$(environment)/$(call tfvar,name)/$(version)"
 

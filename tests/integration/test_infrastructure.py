@@ -20,7 +20,7 @@ def test_terraform_apply(mock_copyfile):
     args = mock_copyfile.call_args
     assert str(args[0][0]).endswith('infrastructure/vars/dev.tfvars')
     assert str(args[0][1]).endswith('infrastructure/vars/dev-1q2w3e.tfvars')
-    terraform._update_tfvars.assert_called_with({'environment': '"%s-test"', 'name': '"1q2w3e-%s"'}, args[0][1])
+    terraform._update_tfvars.assert_called_with({}, args[0][1])
     args = terraform._execute.call_args_list
     assert args[0][0][0] == 'apply'
     assert args[1][0][0] == 'output'

@@ -1,21 +1,16 @@
 output "profile" {
-  value = var.profile
+  description = "The AWS profile name"
+  value       = var.profile
 }
 
 output "region" {
-  value = var.region
+  description = "The AWS region name"
+  value       = var.region
 }
 
 output "environment" {
-  value = var.environment
-}
-
-output "name" {
-  value = var.name
-}
-
-output "bucket_name" {
-  value = var.bucket_name
+  description = "Environment name"
+  value       = var.environment
 }
 
 output "jobs" {
