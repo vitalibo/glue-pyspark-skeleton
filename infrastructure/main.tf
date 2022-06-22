@@ -51,6 +51,7 @@ module "sample_job" {
   script_location   = null_resource.code.triggers.driver
   extra_py_files    = [null_resource.code.triggers.package]
   extra_files       = [null_resource.code.triggers.config]
+  extra_jars        = ["https://s3.us-west-2.amazonaws.com/crawler-public/json/serde/json-serde.jar"]
   job_language      = "python"
   timeout           = 10
   number_of_workers = 2

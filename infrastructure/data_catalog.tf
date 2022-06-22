@@ -5,6 +5,7 @@ resource "aws_glue_catalog_database" "data_lake" {
 resource "aws_glue_catalog_table" "peoples" {
   database_name = aws_glue_catalog_database.data_lake.name
   name          = "peoples"
+  table_type    = "EXTERNAL_TABLE"
   parameters    = {
     "classification" = "json"
   }
@@ -49,6 +50,7 @@ resource "aws_glue_catalog_table" "peoples" {
 resource "aws_glue_catalog_table" "departments" {
   database_name = aws_glue_catalog_database.data_lake.name
   name          = "departments"
+  table_type    = "EXTERNAL_TABLE"
   parameters    = {
     "classification" = "json"
   }
@@ -83,6 +85,7 @@ resource "aws_glue_catalog_table" "departments" {
 resource "aws_glue_catalog_table" "wages" {
   database_name = aws_glue_catalog_database.data_lake.name
   name          = "wages"
+  table_type    = "EXTERNAL_TABLE"
   parameters    = {
     classification           = "csv"
     delimiter                = ","
