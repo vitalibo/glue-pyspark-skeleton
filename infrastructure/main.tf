@@ -34,7 +34,7 @@ set -e
 (cd .. && make clean build)
 echo "${data.template_file.config.rendered}" > ${path.module}/../dist/application.yaml
 
-aws s3 cp ${path.module}/../src/dp/driver.py ${self.triggers.driver} --profile=${var.profile}
+aws s3 cp ${path.module}/../src/main/python/dp/driver.py ${self.triggers.driver} --profile=${var.profile}
 aws s3 cp ${path.module}/../dist/glue_pyspark_skeleton-1.0.0-py3-none-any.whl ${self.triggers.package} --profile=${var.profile}
 aws s3 cp ${path.module}/../dist/application.yaml ${self.triggers.config} --profile=${var.profile}
 

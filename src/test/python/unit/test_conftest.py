@@ -43,7 +43,7 @@ def test_create_dataframe_from_resource(spark):
 def test_resource():
     actual = Helpers.resource(__file__, 'foo.json')
 
-    assert actual.endswith('tests/unit/foo.json')
+    assert actual.endswith('src/test/python/unit/foo.json')
 
 
 def test_resource_as_str():

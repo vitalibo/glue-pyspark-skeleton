@@ -78,7 +78,7 @@ class TerraformProxy:
         self._environment = f'{environment}-{execution_id}'
         self._profile = profile
         self._execution_id = execution_id
-        self._workdir = Path(__file__).parents[2] / 'infrastructure'
+        self._workdir = Path(__file__).parents[4] / 'infrastructure'
         self._parent_tfvars = self._workdir / 'vars' / f'{environment}.tfvars'
         self._tfvars = self._workdir / 'vars' / f'{self._environment}.tfvars'
 
