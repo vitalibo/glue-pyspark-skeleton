@@ -3,18 +3,21 @@
     "name": "Sales and marketing",
     "gender": "F",
     "avg_salary": 4900.0,
-    "max_age": 44
+    "max_age": 44,
+    "java": true
   },
   {
     "name": "IT services",
     "gender": "F",
     "avg_salary": 4100.0,
-    "max_age": 35
+    "max_age": 35,
+    "java": true
   },
   {
     "name": "Accounts and Finance",
     "gender": "F",
     "avg_salary": 3200.0,
-    "max_age": 30
+    "max_age": 30,
+    "java": true
   }
 ]

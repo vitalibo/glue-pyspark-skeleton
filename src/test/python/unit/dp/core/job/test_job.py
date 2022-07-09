@@ -14,6 +14,7 @@ from dp.core.job.sample_job import SampleJob
     'Case #7: maximum age',
     'Case #8: empty dataframes'
 )
+@pytest.mark.mvn
 def test_sample_job(case, spark):
     job = SampleJob(
         spark.create_source_from_resource(

@@ -43,6 +43,9 @@ class Factory:
         if 'connection_type' in conf and conf['connection_type'] == 's3':
             from dp.infra.aws import glue  # pylint: disable=import-outside-toplevel
             return glue.GlueSource(**{'transformation_ctx': name, **conf})
+        if 'java_class' in conf:
+            from dp.core.util import java  # pylint: disable=import-outside-toplevel
+            return java.JavaSource(conf['java_class'], *conf['args'])
 
         raise ValueError(f'Unsupported source: {name}')
 
@@ -50,6 +53,9 @@ class Factory:
         if 'connection_type' in conf and conf['connection_type'] == 's3':
             from dp.infra.aws import glue  # pylint: disable=import-outside-toplevel
             return glue.GlueSink(**{'transformation_ctx': name, **conf})
+        if 'java_class' in conf:
+            from dp.core.util import java  # pylint: disable=import-outside-toplevel
+            return java.JavaSink(conf['java_class'], *conf['args'])
 
         raise ValueError(f'Unsupported sink: {name}')
 

@@ -3,6 +3,7 @@
     "name": "Accounts and Finance",
     "gender": "F",
     "avg_salary": 3200.0,
-    "max_age": 21
+    "max_age": 21,
+    "java": true
   }
 ]

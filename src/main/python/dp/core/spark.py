@@ -3,7 +3,7 @@ from __future__ import annotations
 import abc
 
 from pyspark import SparkContext, SparkConf
-from pyspark.sql import DataFrame, SparkSession
+from pyspark.sql import DataFrame, SparkSession, Column
 
 
 class Job(abc.ABC):
@@ -92,3 +92,7 @@ class Spark:
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.__sc.stop()
+
+
+DataFrame.getNumPartitions = lambda df: df.rdd.getNumPartitions()
+Column.getName = lambda col: col._jc.toString()  # noqa pylint: disable=protected-access

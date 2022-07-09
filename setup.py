@@ -8,6 +8,7 @@ setup(
         'dp',
         'dp.core',
         'dp.core.job',
+        'dp.core.util',
         'dp.infra',
         'dp.infra.aws'
     ],

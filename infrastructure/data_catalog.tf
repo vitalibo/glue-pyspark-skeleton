@@ -126,5 +126,10 @@ resource "aws_glue_catalog_table" "wages" {
       name = "max_age"
       type = "int"
     }
+
+    columns {
+      name = "java"
+      type = "boolean"
+    }
   }
 }

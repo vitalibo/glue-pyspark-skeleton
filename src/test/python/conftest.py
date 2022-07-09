@@ -1,6 +1,8 @@
 import json
 import os
+import subprocess
 from operator import itemgetter
+from pathlib import Path
 
 import pytest
 from pyspark.sql import SparkSession, DataFrame
@@ -12,12 +14,14 @@ from integration._data_catalog import (  # noqa pylint: disable=unused-import
 )
 from integration._infrastructure import (  # noqa pylint: disable=unused-import
     pytest_addoption,
-    pytest_configure,
-    pytest_collection_modifyitems,
+    pytest_configure as infra_pytest_configure,
+    pytest_collection_modifyitems as infra_pytest_collection_modifyitems,
     terraform_fixture,
     boto3_session_fixture,
     glue_job_executor_fixture
 )
+
+CLASS_PATH = Path(__file__).parents[3] / 'target' / 'classes'
 
 
 @pytest.fixture(scope='module', name='spark')
@@ -27,6 +31,8 @@ def spark_fixture():
     session = SparkSession.builder \
         .appName('PyTest') \
         .config('spark.sql.session.timeZone', 'UTC') \
+        .config('spark.driver.extraClassPath', CLASS_PATH) \
+        .config('spark.executor.extraClassPath', CLASS_PATH) \
         .getOrCreate()
 
     with EmbeddedSpark(session) as instance:
@@ -46,6 +52,31 @@ def marker_cases(*args):
     return pytest.mark.parametrize('case', [
         pytest.param(f'case{i}', id=item) for i, item in enumerate(args)
     ])
+
+
+def pytest_configure(config):
+    infra_pytest_configure(config)
+
+    config.addinivalue_line('markers', 'mvn: mark a test that required compile java code.')
+
+
+def pytest_collection_modifyitems(config, items):
+    infra_pytest_collection_modifyitems(config, items)
+
+    for item in items:
+        if 'mvn' in item.keywords:
+            mvn_compile()
+            return
+
+
+def mvn_compile():
+    """ Compile Java source code """
+
+    command = 'mvn clean compile -Dmaven.test.skip'
+    with subprocess.Popen(args=command.split(), cwd=Path(__file__).parents[3]) as process:
+        process.communicate()
+        if process.returncode != 0:
+            raise subprocess.SubprocessError('mvn failed')
 
 
 class EmbeddedSpark(Spark):

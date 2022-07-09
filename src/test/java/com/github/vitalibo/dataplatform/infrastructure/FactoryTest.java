@@ -6,6 +6,7 @@ public class FactoryTest {
 
     @Test
     public void test() {
+        new Factory();
     }
 
 }

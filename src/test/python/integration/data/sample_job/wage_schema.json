@@ -15,6 +15,10 @@
     {
       "name": "max_age",
       "type": "integer"
+    },
+    {
+      "name": "java",
+      "type": "boolean"
     }
   ],
   "type": "struct"
