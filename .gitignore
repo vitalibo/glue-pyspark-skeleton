@@ -1,6 +1,9 @@
 .idea/
 .DS_Store
 *.iml
+*dependency-reduced-pom.xml
+*target/
+*Run.java
 .terraform/
 .terraform.lock.hcl
 *.egg-info/

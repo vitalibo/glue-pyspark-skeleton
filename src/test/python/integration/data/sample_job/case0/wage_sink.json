@@ -1,0 +1,37 @@
+[
+  {
+    "name": "\"IT services\"",
+    "gender": "F",
+    "avg_salary": 4600.0,
+    "max_age": 35,
+    "java": true
+  },
+  {
+    "name": "\"IT services\"",
+    "gender": "M",
+    "avg_salary": 3800.0,
+    "max_age": 38,
+    "java": true
+  },
+  {
+    "name": "\"Sales and marketing\"",
+    "gender": "F",
+    "avg_salary": 4900.0,
+    "max_age": 44,
+    "java": true
+  },
+  {
+    "name": "\"Sales and marketing\"",
+    "gender": "M",
+    "avg_salary": 4900.0,
+    "max_age": 39,
+    "java": true
+  },
+  {
+    "name": "HR",
+    "gender": "F",
+    "avg_salary": 2800.0,
+    "max_age": 41,
+    "java": true
+  }
+]

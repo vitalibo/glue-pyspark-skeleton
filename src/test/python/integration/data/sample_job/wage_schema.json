@@ -1,0 +1,25 @@
+{
+  "fields": [
+    {
+      "name": "name",
+      "type": "string"
+    },
+    {
+      "name": "gender",
+      "type": "string"
+    },
+    {
+      "name": "avg_salary",
+      "type": "double"
+    },
+    {
+      "name": "max_age",
+      "type": "integer"
+    },
+    {
+      "name": "java",
+      "type": "boolean"
+    }
+  ],
+  "type": "struct"
+}

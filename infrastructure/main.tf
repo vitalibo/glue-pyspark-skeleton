@@ -24,6 +24,7 @@ resource "null_resource" "code" {
     driver  = "${var.script_home}/driver.py"
     package = "${var.script_home}/glue_pyspark_skeleton-1.0.0-py3-none-any.whl"
     config  = "${var.script_home}/application.yaml"
+    jar     = "${var.script_home}/glue-pyspark-skeleton-1.0-SNAPSHOT.jar"
     hash    = md5(data.template_file.config.rendered)
   }
 
@@ -34,9 +35,10 @@ set -e
 (cd .. && make clean build)
 echo "${data.template_file.config.rendered}" > ${path.module}/../dist/application.yaml
 
-aws s3 cp ${path.module}/../src/dp/driver.py ${self.triggers.driver} --profile=${var.profile}
+aws s3 cp ${path.module}/../src/main/python/dp/driver.py ${self.triggers.driver} --profile=${var.profile}
 aws s3 cp ${path.module}/../dist/glue_pyspark_skeleton-1.0.0-py3-none-any.whl ${self.triggers.package} --profile=${var.profile}
 aws s3 cp ${path.module}/../dist/application.yaml ${self.triggers.config} --profile=${var.profile}
+aws s3 cp ${path.module}/../target/glue-pyspark-skeleton-1.0-SNAPSHOT.jar ${self.triggers.jar} --profile=${var.profile}
 
 (cd ..  && make clean)
 EOT
@@ -51,7 +53,7 @@ module "sample_job" {
   script_location   = null_resource.code.triggers.driver
   extra_py_files    = [null_resource.code.triggers.package]
   extra_files       = [null_resource.code.triggers.config]
-  extra_jars        = ["https://s3.us-west-2.amazonaws.com/crawler-public/json/serde/json-serde.jar"]
+  extra_jars        = [null_resource.code.triggers.jar, "https://s3.us-west-2.amazonaws.com/crawler-public/json/serde/json-serde.jar"]
   job_language      = "python"
   timeout           = 10
   number_of_workers = 2
