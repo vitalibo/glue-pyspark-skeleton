@@ -24,7 +24,7 @@ from integration._infrastructure import (  # noqa pylint: disable=unused-import
 CLASS_PATH = Path(__file__).parents[3] / 'target' / 'classes'
 
 
-@pytest.fixture(scope='module', name='spark')
+@pytest.fixture(scope='session', name='spark')
 def spark_fixture():
     """ Create instance embedded spark fixture for testing """
 
